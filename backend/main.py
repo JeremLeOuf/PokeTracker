@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -7,11 +7,13 @@ from models import User
 from schemas import UserCreate, Token
 from utils import hash_password, verify_password
 from auth import create_access_token, get_current_user
+from pokeprice import fetch_and_store_sets
 
 # Create tables if they don't exist
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+router = APIRouter()
 
 @app.get("/")
 async def root():
@@ -46,3 +48,10 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @app.get("/me")
 def read_users_me(current_user: User = Depends(get_current_user)):
     return {"username": current_user.username, "email": current_user.email}
+
+@router.post("/update-sets")
+async def update_sets(db: Session = Depends(get_db)):
+    await fetch_and_store_sets(db)
+    return {"message": "Sets updated successfully"}
+
+app.include_router(router)

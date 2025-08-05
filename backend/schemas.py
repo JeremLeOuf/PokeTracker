@@ -19,13 +19,16 @@ class UserLogin(BaseModel):
     password: str
 
 class PokemonSetBase(BaseModel):
-    id: int
+    id: str
     name: str
     series: str
     printed_total: int | None
     total: int | None
     ptcgo_code: str | None
     release_date: date | None
+
+    class Config:
+        from_attributes = True
 
 class PokemonSetCreate(PokemonSetBase):
     pass
